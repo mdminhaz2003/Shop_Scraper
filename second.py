@@ -19,17 +19,12 @@ driver.get("https://www.yoox.com/us/women")
 driver.execute_script("window.open('https://www.yoox.com/us/women');")
 
 
-def image_link_creator(code_10: str, key: str) -> str:
-    code2 = code_10[:2]
-    return f"https://www.yoox.com/images/items/{code2}/{code_10}_14{key}.jpg"
-
-
 def scraper(product_url: str, tab_index: int) -> None:
     driver.switch_to.window(driver.window_handles[tab_index % 2])
     driver.get(f"{product_url}")
     time.sleep(2)
     data = {
-        "Product_Key": "",
+        "Primary_Key": "",
         "Handle": "",
         "Title": "",
         "Body_HTML": "",
@@ -38,14 +33,19 @@ def scraper(product_url: str, tab_index: int) -> None:
         "Custom_Product_Type": "",
         "Tags": "",
         "Published": True,
-        "Product_Images_Downloaded": "",
         "Product_URL": product_url,
         "Option1_Name": "Size",
         "Option1_Value": "",
         "Option2_Name": "Color",
         "Option2_Value": "",
-        "Option3_Name": "",
+        "Option3_Name": "RGB_Color",
         "Option3_Value": "",
+        "Option4_Name": "Product_Key",
+        "Option4_Value": "",
+        "Option5_Name": "Color_Code",
+        "Option5_Value": "",
+        "Option6_Name": "",
+        "Option6_Value": "",
         "Variant_SKU": "",
         "Variant_Grams": "",
         "Variant_Inventory_Tracker": "",
@@ -103,42 +103,61 @@ def scraper(product_url: str, tab_index: int) -> None:
 
         sizes = [size['default']['text'] for size in page_info['itemApi']['sizes']]
         colors = [color["name"] for color in page_info["itemApi"]["colors"]]
-        code10 = page_info["itemApi"]["code"]
-        data["Product_Key"] = code10
-        image_url = [image_link_creator(code10, format_key) for format_key in page_info["itemApi"]["imagesFormatValues"]]
-        image_position = [str(value + 1) for value in range(len(image_url))]
-        image_download_checker = [str(False) for _ in range(len(image_url))]
+        rgb_color = [color["rgb"] for color in page_info["itemApi"]["colors"]]
+        product_key = [color["code10"] for color in page_info["itemApi"]["colors"]]
+        color_code = [color["colorCode"] for color in page_info["itemApi"]["colors"]]
+        image_format_values = page_info["itemApi"]["imagesFormatValues"]
+
+        image_url = []
+        image_position = []
+        key = ""
+        for code10 in product_key:
+            key += code10
+            position = 1
+            for format_key in image_format_values:
+                image_url.append(f"https://www.yoox.com/images/items/{code10[:2]}/{code10}_14{format_key}.jpg")
+                image_position.append(str(position))
+                position += 1
 
         max_rows = max(len(colors), len(sizes), len(image_url))
 
         if len(colors) == max_rows and len(sizes) == max_rows and len(image_url) == max_rows:
+            data["Primary_Key"] = key
             data["Option1_Value"] = sizes
             data["Option2_Value"] = colors
+            data["Option3_Value"] = rgb_color
+            data["Option4_Value"] = product_key
+            data["Option5_Value"] = color_code
             data["Original_Image_Src"] = image_url
             data["Image_Position"] = image_position
         else:
             if max_rows > len(colors):
                 difference_between = max_rows - len(colors)
-                for value in range(difference_between):
+                for _ in range(difference_between):
                     colors.append("")
+                    rgb_color.append("")
+                    product_key.append("")
+                    color_code.append("")
             if max_rows > len(sizes):
                 difference_between = max_rows - len(sizes)
-                for value in range(difference_between):
+                for _ in range(difference_between):
                     sizes.append("")
             if max_rows > len(image_url):
                 difference_between = max_rows - len(image_url)
-                for value in range(difference_between):
+                for _ in range(difference_between):
                     image_url.append("")
                     image_position.append("")
-                    image_download_checker.append("")
 
+            data["Primary_Key"] = key
             data["Option1_Value"] = sizes
             data["Option2_Value"] = colors
+            data["Option3_Value"] = rgb_color
+            data["Option4_Value"] = product_key
+            data["Option5_Value"] = color_code
             data["Original_Image_Src"] = image_url
             data["Image_Position"] = image_position
-            data["Product_Images_Downloaded"] = image_download_checker
 
-        if not db.contains(User.Product_Key == str(data['Product_Key'])):
+        if not db.contains(User.Product_Key == str(data['Primary_Key'])):
             db.insert(data)
             second_db.remove(User.url == product_url)
         else:
