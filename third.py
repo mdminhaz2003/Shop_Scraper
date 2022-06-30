@@ -4,7 +4,7 @@ from tinydb import TinyDB
 db = TinyDB('db2.json')
 db_data = db.all()
 headers = [key for key in db_data[0].keys()]
-value = headers.index("Option1_Value")
+value = headers.index("Option1 Value")
 header_text = ""
 for header in headers:
     header_text += f"{header},"
@@ -26,30 +26,39 @@ with open("product_info_spotify_format.csv", "w") as file:
                     pass
 
         single_row_data_list.append(first_line_data_list)
-        number_of_line = len(single_row_data["Option1_Value"])
+        number_of_line = len(single_row_data["Option1 Value"])
 
         if number_of_line >= 2:
             value_index = 1
             for line in range(number_of_line - 1):
                 secondary_line_data_list = ["" for value in headers]
 
-                size_index = headers.index("Option1_Value")
-                color_index = headers.index("Option2_Value")
-                rgb_color = headers.index("Option3_Value")
-                product_key = headers.index("Option4_Value")
-                color_code = headers.index("Option5_Value")
-                price_index = headers.index("Variant_Price")
-                img_link_index = headers.index("Original_Image_Src")
-                img_position_index = headers.index("Image_Position")
+                handle_index = headers.index("Handle")
+                color_index = headers.index("Option1 Value")
+                size_index = headers.index("Option2 Value")
+                variant_inventory = headers.index("Variant Inventory Policy")
+                variant_fulfil = headers.index("Variant Fulfillment Service")
+                price_index = headers.index("Variant Price")
+                variant_requires = headers.index("Variant Requires Shipping")
+                variant_taxable = headers.index("Variant Taxable")
+                variant_image = headers.index("Variant Image")
+                img_link_index = headers.index("Image Src")
+                img_position_index = headers.index("Image Position")
+                variant_weight_unit = headers.index("Variant Weight Unit")
 
-                secondary_line_data_list[size_index] = single_row_data["Option1_Value"][value_index]
-                secondary_line_data_list[color_index] = single_row_data["Option2_Value"][value_index]
-                secondary_line_data_list[rgb_color] = single_row_data["Option3_Value"][value_index]
-                secondary_line_data_list[product_key] = single_row_data["Option4_Value"][value_index]
-                secondary_line_data_list[color_code] = single_row_data["Option5_Value"][value_index]
-                secondary_line_data_list[price_index] = single_row_data["Variant_Price"]
-                secondary_line_data_list[img_link_index] = single_row_data["Original_Image_Src"][value_index]
-                secondary_line_data_list[img_position_index] = single_row_data["Image_Position"][value_index]
+                secondary_line_data_list[handle_index] = single_row_data["Handle"][value_index]
+                secondary_line_data_list[color_index] = single_row_data["Option1 Value"][value_index]
+                secondary_line_data_list[size_index] = single_row_data["Option2 Value"][value_index]
+                secondary_line_data_list[variant_inventory] = single_row_data["Variant Inventory Policy"][value_index]
+                secondary_line_data_list[variant_fulfil] = single_row_data["Variant Fulfillment Service"][value_index]
+                secondary_line_data_list[price_index] = single_row_data["Variant Price"][value_index]
+                secondary_line_data_list[variant_requires] = single_row_data["Variant Requires Shipping"][value_index]
+                secondary_line_data_list[variant_taxable] = single_row_data["Variant Taxable"][value_index]
+                secondary_line_data_list[variant_image] = single_row_data["Variant Image"][value_index]
+
+                secondary_line_data_list[img_link_index] = single_row_data["Image Src"][value_index]
+                secondary_line_data_list[img_position_index] = single_row_data["Image Position"][value_index]
+                secondary_line_data_list[variant_weight_unit] = single_row_data["Variant Weight Unit"][value_index]
                 single_row_data_list.append(secondary_line_data_list)
                 value_index += 1
         else:
